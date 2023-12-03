@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "axis=x,model=end_a": {
+      "model": "createaddition:block/rotor/end_a",
+      "x": 270,
+      "y": 90
+    },
+    "axis=x,model=end_b": {
+      "model": "createaddition:block/rotor/end_b",
+      "x": 270,
+      "y": 90
+    },
+    "axis=x,model=middle": {
+      "model": "createaddition:block/rotor/middle",
+      "x": 270,
+      "y": 90
+    },
+    "axis=x,model=single": {
+      "model": "createaddition:block/rotor/single",
+      "x": 270,
+      "y": 90
+    },
+    "axis=y,model=end_a": {
+      "model": "createaddition:block/rotor/end_a",
+      "x": 180
+    },
+    "axis=y,model=end_b": {
+      "model": "createaddition:block/rotor/end_b",
+      "x": 180
+    },
+    "axis=y,model=middle": {
+      "model": "createaddition:block/rotor/middle",
+      "x": 180
+    },
+    "axis=y,model=single": {
+      "model": "createaddition:block/rotor/single",
+      "x": 180
+    },
+    "axis=z,model=end_b": {
+      "model": "createaddition:block/rotor/end_b",
+      "x": 90
+    },
+    "axis=z,model=end_a": {
+      "model": "createaddition:block/rotor/end_a",
+      "x": 90
+    },
+    "axis=z,model=middle": {
+      "model": "createaddition:block/rotor/middle",
+      "x": 270
+    },
+    "axis=z,model=single": {
+      "model": "createaddition:block/rotor/single",
+      "x": 270
+    }
+  }
+}

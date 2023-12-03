@@ -4,6 +4,7 @@ import com.mrh0.createaddition.energy.WireType;
 import com.mrh0.createaddition.item.WireSpool;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
@@ -11,7 +12,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.energy.IEnergyStorage;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Util {
 	public static int max(int...v) {
@@ -28,6 +34,43 @@ public class Util {
 			if(i < m)
 				m = i;
 		return m;
+	}
+
+	public static List<Direction> getAxisDirections(Direction.Axis axis) {
+		List<Direction> out = new ArrayList<Direction>();
+		if(axis == Direction.Axis.Z) {
+			out.add(Direction.DOWN);
+			out.add(Direction.EAST);
+			out.add(Direction.UP);
+			out.add(Direction.WEST);
+		} else if(axis == Direction.Axis.Y) {
+			out.add(Direction.NORTH);
+			out.add(Direction.EAST);
+			out.add(Direction.SOUTH);
+			out.add(Direction.WEST);
+		} else {
+			out.add(Direction.DOWN);
+			out.add(Direction.NORTH);
+			out.add(Direction.UP);
+			out.add(Direction.SOUTH);
+		}
+		return out;
+	}
+	public static double getSimpleDistance(BlockPos pos1, BlockPos pos2) {
+		return Math.sqrt(Math.pow((pos1.getX() - pos2.getX()), 2)
+				+ Math.pow((pos1.getY() - pos2.getY()), 2)
+				+ Math.pow((pos1.getZ() - pos2.getZ()), 2));
+	}
+
+
+	@Nullable
+	public static Direction getDirectionTo(Level world, BlockPos fromPos, BlockPos centerPos, Direction.Axis rotationAxis) {
+		List<Direction> directions = getAxisDirections(rotationAxis);
+		for (Direction dir : directions) {
+			BlockPos checkPos = fromPos.relative(dir);
+			if(checkPos.equals(centerPos)) return dir;
+		}
+		return null;
 	}
 
 	public static int minIndex(int...v) {

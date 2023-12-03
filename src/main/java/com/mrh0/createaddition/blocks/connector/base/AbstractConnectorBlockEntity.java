@@ -44,7 +44,6 @@ public abstract class AbstractConnectorBlockEntity extends SmartBlockEntity impl
 	private final LocalNode[] localNodes;
 	private final IWireNode[] nodeCache;
 	private EnergyNetwork network;
-	private int demand = 0;
 
 	private boolean wasContraption = false;
 	private boolean firstTick = true;
@@ -283,8 +282,6 @@ public abstract class AbstractConnectorBlockEntity extends SmartBlockEntity impl
 	private final static IEnergyStorage NULL_ES = new EnergyStorage(0, 0, 0);
 	private void networkTick(EnergyNetwork network) {
 		ConnectorMode mode = getMode();
-		if(level == null) return;
-		if(level.isClientSide()) return;
 
 		if (mode == ConnectorMode.Push) {
 			int pulled = network.pull(network.demand(external.orElse(NULL_ES).receiveEnergy(getMaxOut(), true)));

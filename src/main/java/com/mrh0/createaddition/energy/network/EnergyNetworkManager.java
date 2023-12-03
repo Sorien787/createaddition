@@ -15,7 +15,7 @@ public class EnergyNetworkManager {
 	
 	public EnergyNetworkManager(LevelAccessor world) {
 		instances.put(world, this);
-		networks = new ArrayList<EnergyNetwork>();
+		networks = new ArrayList<>();
 	}
 	
 	public void add(EnergyNetwork network) {
@@ -23,7 +23,7 @@ public class EnergyNetworkManager {
 	}
 	
 	public void tick() {
-		List<EnergyNetwork> keep = new ArrayList<EnergyNetwork>();
+		List<EnergyNetwork> keep = new ArrayList<>();
 		for(int i = 0; i < networks.size(); i++) {
 			EnergyNetwork en = networks.get(i);
 			if(en.isValid()) {

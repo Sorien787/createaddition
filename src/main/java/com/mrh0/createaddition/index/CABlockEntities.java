@@ -1,6 +1,7 @@
 package com.mrh0.createaddition.index;
 
 import com.mrh0.createaddition.blocks.alternator.AlternatorBlockEntity;
+import com.mrh0.createaddition.blocks.collector.CollectorBlockEntity;
 import com.mrh0.createaddition.blocks.connector.LargeConnectorBlockEntity;
 import com.mrh0.createaddition.blocks.connector.SmallConnectorBlockEntity;
 import com.mrh0.createaddition.blocks.connector.base.ConnectorRenderer;
@@ -15,6 +16,8 @@ import com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyIn
 import com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity;
 import com.mrh0.createaddition.blocks.redstone_relay.RedstoneRelayBlockEntity;
 import com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity;
+import com.mrh0.createaddition.blocks.rotor.RotorBlockEntity;
+import com.mrh0.createaddition.blocks.stator.StatorBlockEntity;
 import com.mrh0.createaddition.blocks.tesla_coil.TeslaCoilBlockEntity;
 import com.mrh0.createaddition.CreateAddition;
 import com.mrh0.createaddition.blocks.accumulator.AccumulatorBlockEntity;
@@ -22,7 +25,11 @@ import com.mrh0.createaddition.blocks.alternator.*;
 import com.mrh0.createaddition.blocks.rolling_mill.*;
 import com.mrh0.createaddition.blocks.accumulator.*;
 import com.mrh0.createaddition.blocks.redstone_relay.*;
+import com.simibubi.create.content.contraptions.bearing.BearingInstance;
+import com.simibubi.create.content.contraptions.bearing.BearingRenderer;
+import com.simibubi.create.content.kinetics.base.CutoutRotatingInstance;
 import com.simibubi.create.content.kinetics.base.HalfShaftInstance;
+import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 
 public class CABlockEntities {
@@ -39,7 +46,26 @@ public class CABlockEntities {
 			.validBlocks(CABlocks.ALTERNATOR)
 			.renderer(() -> AlternatorRenderer::new)
 			.register();
-	
+
+	public static final BlockEntityEntry<RotorBlockEntity> ROTOR = CreateAddition.REGISTRATE
+			.blockEntity("rotor", RotorBlockEntity::new)
+			.instance(() -> CutoutRotatingInstance::new, false)
+			.validBlocks(CABlocks.ROTOR)
+			.renderer(() -> KineticBlockEntityRenderer::new)
+			.register();
+
+	public static final BlockEntityEntry<CollectorBlockEntity> COLLECTOR = CreateAddition.REGISTRATE
+			.blockEntity("collector", CollectorBlockEntity::new)
+			.instance(() -> CutoutRotatingInstance::new, false)
+			.validBlocks(CABlocks.COLLECTOR)
+			.renderer(() -> KineticBlockEntityRenderer::new)
+			.register();
+
+	public static final BlockEntityEntry<StatorBlockEntity> STATOR = CreateAddition.REGISTRATE
+			.blockEntity("stator", StatorBlockEntity::new)
+			.validBlocks(CABlocks.STATOR)
+			.register();
+
 	public static final BlockEntityEntry<RollingMillBlockEntity> ROLLING_MILL = CreateAddition.REGISTRATE
 			.blockEntity("rolling_mill", RollingMillBlockEntity::new)
 			.instance(() -> RollingMillInstance::new)

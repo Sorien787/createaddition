@@ -17,7 +17,7 @@ public class CAShapes {
 		return new Builder(shape);
 	}
 
-	
+
 	public static Builder shape(double x1, double y1, double z1, double x2, double y2, double z2) {
 		return shape(cuboid(x1, y1, z1, x2, y2, z2));
 	}
@@ -75,7 +75,9 @@ public class CAShapes {
 		public VoxelShaper forHorizontal(Direction direction) {
 			return build(VoxelShaper::forHorizontal, direction);
 		}
-
+		public VoxelShaper defaultUp() {
+			return forDirectional(Direction.UP);
+		}
 		public VoxelShaper forDirectional() {
 			return forDirectional(Direction.UP);
 		}

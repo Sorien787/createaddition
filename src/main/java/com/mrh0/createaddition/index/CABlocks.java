@@ -13,9 +13,13 @@ import com.mrh0.createaddition.blocks.crops.HarmfulPlantBlock;
 import com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterBlock;
 import com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterDisplaySource;
 import com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterBlockItem;
+import com.mrh0.createaddition.blocks.rotor.RotorBlock;
 import com.mrh0.createaddition.blocks.modular_accumulator.*;
+import com.mrh0.createaddition.blocks.stator.StatorBlock;
+import com.mrh0.createaddition.blocks.collector.CollectorBlock;
 import com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlock;
 import com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceMovement;
+import com.mrh0.createaddition.datagen.DynamicStateGenerator;
 import com.mrh0.createaddition.energy.NodeMovementBehaviour;
 import com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlock;
 import com.mrh0.createaddition.blocks.electric_motor.ElectricMotorBlock;
@@ -32,11 +36,13 @@ import com.simibubi.create.content.kinetics.BlockStressDefaults;
 import com.simibubi.create.content.processing.AssemblyOperatorBlockItem;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
 import com.simibubi.create.foundation.data.AssetLookup;
+import com.simibubi.create.foundation.data.BuilderTransformers;
 import com.simibubi.create.foundation.data.SharedProperties;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.simibubi.create.foundation.utility.Couple;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import static com.simibubi.create.content.redstone.displayLink.AllDisplayBehaviours.assignDataBehaviour;
+import static com.simibubi.create.foundation.data.TagGen.axeOrPickaxe;
 import static com.simibubi.create.foundation.data.TagGen.pickaxeOnly;
 
 import net.minecraft.client.renderer.RenderType;
@@ -69,6 +75,43 @@ public class CABlocks {
 			.tag(AllBlockTags.SAFE_NBT.tag) //Dono what this tag means (contraption safe?).
 			.item()
 			.transform(customItemModel())
+			.register();
+	public static final BlockEntry<RotorBlock> ROTOR = CreateAddition.REGISTRATE.block("rotor", RotorBlock::new)
+			.initialProperties(SharedProperties::copperMetal)
+			.properties(props -> props
+					.sound(SoundType.NETHERITE_BLOCK)
+					.noOcclusion()
+			)
+			.transform(pickaxeOnly())
+			.transform(BlockStressDefaults.setImpact(48.0))
+			.blockstate(new DynamicStateGenerator(RotorBlock.MODEL_TYPE)::generate)
+			.item()
+			.transform(customItemModel("rotor", "single"))
+			.register();
+
+	public static final BlockEntry<CollectorBlock> COLLECTOR = CreateAddition.REGISTRATE.block("collector", CollectorBlock::new)
+			.initialProperties(SharedProperties::softMetal)
+			.properties(props -> props
+					.sound(SoundType.NETHERITE_BLOCK)
+					.noOcclusion()
+			)
+			.transform(BlockStressDefaults.setImpact(48.0))
+			.transform(pickaxeOnly())
+			.blockstate(new DynamicStateGenerator(CollectorBlock.MODEL_TYPE)::generate)
+			.item()
+			.transform(customItemModel("collector", "base"))
+			.register();
+
+	public static final BlockEntry<StatorBlock> STATOR = CreateAddition.REGISTRATE.block("stator", StatorBlock::new)
+			.initialProperties(SharedProperties::netheriteMetal)
+			.properties(props -> props
+					.sound(SoundType.NETHERITE_BLOCK)
+					.noOcclusion()
+			)
+			.transform(pickaxeOnly())
+			.blockstate(new DynamicStateGenerator(StatorBlock.MODEL_TYPE)::generate)
+			.item()
+			.transform(customItemModel("stator", "base"))
 			.register();
 
 	public static final BlockEntry<RollingMillBlock> ROLLING_MILL = CreateAddition.REGISTRATE.block("rolling_mill", RollingMillBlock::new)

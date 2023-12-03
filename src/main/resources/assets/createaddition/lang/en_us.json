@@ -297,5 +297,11 @@
 	"effect.createaddition.shocking":"Shocked",
 	"death.attack.tesla_coil": "%1$s received a lethal electric shock",
   	"death.attack.tesla_coil.player": "%1$s received a lethal electric shock while fighting %2$s",
-  	"effect.createaddition.shocking.description": "Causes severely reduced movement speed"
+  	"effect.createaddition.shocking.description": "Causes severely reduced movement speed",
+
+	"createaddition.collector.collector_mode": "Collector Mode",
+	"createaddition.collector.collector_mode.generator": "Generating Power",
+	"createaddition.collector.collector_mode.motor":"Generating SU",
+	"createaddition.collector.number_of_coils":"Amount of complete coils:",
+	"createaddition.collector.efficiency_of_coils":"Coil efficiency:"
 }

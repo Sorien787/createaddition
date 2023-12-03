@@ -11,6 +11,8 @@ public class Config {
 
 	public static final String CATAGORY_GENERAL = "general";
 	public static final String CATAGORY_ELECTRIC_MOTOR = "electric_motor";
+	public static final String CATEGORY_MOTOR_BEARING     = "motor_bearing";
+	public static final String CATEGORY_GENERATOR_BEARING = "generator_bearing";
 	public static final String CATAGORY_ALTERNATOR = "alternator";
 	public static final String CATAGORY_ROLLING_MILL = "rolling_mill";
 	public static final String CATAGORY_WIRES = "wires";
@@ -27,6 +29,10 @@ public class Config {
 	public static ForgeConfigSpec.IntValue ELECTRIC_MOTOR_MAX_INPUT;
 	public static ForgeConfigSpec.IntValue ELECTRIC_MOTOR_MINIMUM_CONSUMPTION;
 	public static ForgeConfigSpec.IntValue ELECTRIC_MOTOR_CAPACITY;
+
+	public static ForgeConfigSpec.IntValue GENERATOR_BEARING_SPEED_PER_COPPER_BLOCK;
+	public static ForgeConfigSpec.IntValue GENERATOR_BEARING_MAX_NUM_COPPER_BLOCKS;
+	public static ForgeConfigSpec.IntValue GENERATOR_BEARING_MIN_NUM_COPPER_BLOCKS;
 
 	public static ForgeConfigSpec.IntValue FE_RPM;
 	public static ForgeConfigSpec.IntValue MAX_STRESS;
@@ -45,6 +51,8 @@ public class Config {
 	public static ForgeConfigSpec.IntValue LARGE_CONNECTOR_MAX_INPUT;
 	public static ForgeConfigSpec.IntValue LARGE_CONNECTOR_MAX_OUTPUT;
 	public static ForgeConfigSpec.IntValue LARGE_CONNECTOR_MAX_LENGTH;
+
+	public static ForgeConfigSpec.IntValue ELECTRIC_COIL_MAX_INPUT;
 
 	public static ForgeConfigSpec.BooleanValue CONNECTOR_IGNORE_FACE_CHECK;
 	public static ForgeConfigSpec.BooleanValue CONNECTOR_ALLOW_PASSIVE_IO;
@@ -99,6 +107,16 @@ public class Config {
 				.defineInRange("motor_capacity", 5000, 0, Integer.MAX_VALUE);
 		COMMON_BUILDER.pop();
 
+		COMMON_BUILDER.comment("Generator Bearing").push(CATEGORY_GENERATOR_BEARING);
+		GENERATOR_BEARING_MAX_NUM_COPPER_BLOCKS = COMMON_BUILDER.comment("Generator bearing maximum number of copper blocks")
+				.defineInRange("generator_bearing_max_blocks",  8, 1, Integer.MAX_VALUE);
+
+		GENERATOR_BEARING_MIN_NUM_COPPER_BLOCKS = COMMON_BUILDER.comment("Generator bearing minimum number of copper blocks")
+				.defineInRange("generator_bearing_min_blocks",  1, 1, Integer.MAX_VALUE);
+
+		GENERATOR_BEARING_SPEED_PER_COPPER_BLOCK = COMMON_BUILDER.comment("Generator bearing generated speed per copper block")
+				.defineInRange("generator_bearing_speed_per_block", 16, 1, 256);
+		COMMON_BUILDER.pop();
 
 		COMMON_BUILDER.comment("Alternator").push(CATAGORY_ALTERNATOR);
 		ALTERNATOR_MAX_OUTPUT = COMMON_BUILDER.comment("Alternator max input in FE (Energy transfer, not generation).")
