@@ -1,7 +1,6 @@
 package com.mrh0.createaddition.energy;
 
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 import com.mrh0.createaddition.blocks.connector.ConnectorType;
 import com.mrh0.createaddition.config.Config;
@@ -306,11 +305,32 @@ public interface IWireNode {
 
 	default boolean awakeNetwork(Level world) {
 		boolean b = false;
+		int totalBuff = 0;
+		HashSet<EnergyNetwork> oldNetworks = new HashSet<>();
+		List<EnergyNetwork> newNetworks = new ArrayList<>();
 		for(int i = 0; i < getNodeCount(); i++) {
-			if(!isNetworkValid(i)) {
-				setNetwork(i, EnergyNetwork.nextNode(world, new EnergyNetwork(world), new HashMap<>(), this, i));
-				b = true;
+			if(isNetworkValid(i))
+				continue;
+			EnergyNetwork network = getNetwork(i);
+			if (network != null)
+			{
+				oldNetworks.add(network);
 			}
+			EnergyNetwork newNetwork = new EnergyNetwork(world);
+			EnergyNetwork.nextNode(world, newNetwork, new HashMap<>(), this, i);
+			setNetwork(i, newNetwork);
+			newNetworks.add(newNetwork);
+			b = true;
+		}
+		for(EnergyNetwork oldNetwork : oldNetworks){
+			totalBuff += oldNetwork.getBuff();
+		}
+		for(EnergyNetwork newNetwork : newNetworks){
+			int energyPulled = Math.min(EnergyNetwork.getMaxBuff(), totalBuff);
+			if (energyPulled == 0)
+				break;
+			totalBuff -= energyPulled;
+			newNetwork.push(energyPulled);
 		}
 		return b;
 	}
@@ -399,6 +419,8 @@ public interface IWireNode {
 
 	default void dropWire(Level world, LocalNode node) {
 		WireType type = node.getType();
+		if (type == WireType.NONE)
+			return;
 		ItemStack wire = type.getDrop();
 		node.invalid();
 		dropWire(world, getPos(), wire);

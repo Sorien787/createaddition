@@ -10,6 +10,7 @@ import com.mrh0.createaddition.blocks.oriented.SimpleOrientation;
 import com.mrh0.createaddition.blocks.oriented.SimpleOrientedBlock;
 import com.mrh0.createaddition.blocks.stator.StatorBlock;
 import com.mrh0.createaddition.blocks.rotor.RotorBlock;
+import com.mrh0.createaddition.blocks.stator.StatorConnectivityHandler;
 import com.mrh0.createaddition.index.CABlocks;
 import com.simibubi.create.content.equipment.extendoGrip.ExtendoGripItem;
 import com.simibubi.create.foundation.placement.IPlacementHelper;
@@ -99,38 +100,31 @@ public class StatorDirectionalHelper<T extends Comparable<T>> implements IPlacem
 	}
 
 	private PlacementOffset getRotoredOffset(Level world, BlockPos rotorPos, BlockState rotorState, BlockPos statorPos, BlockState statorState) {
-		Axis revolvingAxis = rotorState.getValue(RotorBlock.AXIS);
-		Direction initialDir = statorState.getValue(SimpleOrientedBlock.ORIENTATION).getCardinal();
-		Axis initialAxis = statorState.getValue(SimpleOrientedBlock.ORIENTATION).getOrient();
-		List<BlockPos> circleMembers = getCircle(statorPos, rotorPos, initialDir, revolvingAxis); 
-		//if(initialDir.getAxis() == Axis.X) reverseList(circleMembers);
-		if(initialDir.getAxis() == Axis.Y && initialAxis == Axis.Z) reverseList(circleMembers);    // i have no idea why this works but it does
-		int count = 0;
-		for(BlockPos pos : circleMembers) {
-			count++;
-			BlockState targetState = world.getBlockState(pos);
-			if(targetState.getBlock() == CABlocks.STATOR.get()) continue;
 
-			if(count % 2 == 0) {  // every other placement is a corner
-				straightPos = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
-				Direction dirToMiddle = getDirectionTo(world, pos, rotorPos, revolvingAxis);
-				return PlacementOffset.success(pos, s -> s.setValue(StatorBlock.ORIENTATION, SimpleOrientation.combine(dirToMiddle, revolvingAxis)));
-			}
-			else {
-				if(count == 1) {
-					straightPos = new BlockPos(pos.getX(), pos.getY(), pos.getZ());
-					return PlacementOffset.success(pos, s -> s.setValue(StatorBlock.ORIENTATION, SimpleOrientation.combine(initialDir, revolvingAxis)).setValue(StatorBlock.MODEL_TYPE, StatorBlock.StatorBlockModelType.CORNER));
-				}
-				else {
-					if(straightPos != null) {
-						Direction dirToMiddle = getDirectionTo(world, straightPos, rotorPos, revolvingAxis);
-						if(dirToMiddle != null) 
-							return PlacementOffset.success(pos, s -> s.setValue(StatorBlock.ORIENTATION, SimpleOrientation.combine(dirToMiddle, revolvingAxis)).setValue(StatorBlock.MODEL_TYPE, StatorBlock.StatorBlockModelType.CORNER));
-					}
-				}
-			}  
+		SimpleOrientation orientation = statorState.getValue(SimpleOrientedBlock.ORIENTATION);
+		StatorBlock.StatorBlockModelType modelType = statorState.getValue(StatorBlock.MODEL_TYPE);
+		StatorConnectivityHandler.StatorBlockData blockData = new StatorConnectivityHandler.StatorBlockData();
+		blockData.blockPos    = statorPos;
+		blockData.orientation = orientation;
+		blockData.modelType   = modelType;
+
+		int numIterations = 1;
+
+		while(numIterations < 8)
+		{
+			numIterations++;
+			blockData = StatorConnectivityHandler.getNextStatorBlockData(blockData, Direction.AxisDirection.POSITIVE);
+
+			BlockState targetState = world.getBlockState(blockData.blockPos);
+			if (targetState.getBlock() == CABlocks.STATOR.get())
+				continue;
+			SimpleOrientation newOrient = blockData.orientation;
+			StatorBlock.StatorBlockModelType newModelType = blockData.modelType;
+			return PlacementOffset.success(blockData.blockPos, s -> s.setValue(StatorBlock.ORIENTATION, newOrient).setValue(StatorBlock.MODEL_TYPE, newModelType));
 		}
 		return PlacementOffset.fail();
+
+
 	}
 
 	private PlacementOffset getFreehandOffset(Player player, Level world, BlockState strictState, BlockPos pos, BlockHitResult ray) {

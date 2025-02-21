@@ -72,7 +72,14 @@ public class Util {
 		}
 		return null;
 	}
-
+	public static Direction getDirection(BlockPos direction) {
+		for (Direction dir : Direction.values()) {
+			int val = direction.get(dir.getAxis());
+			if(val == dir.getAxisDirection().getStep())
+				return dir;
+		}
+		return null;
+	}
 	public static int minIndex(int...v) {
 		int m = 0;
 		for(int i = 0; i < v.length; i++)

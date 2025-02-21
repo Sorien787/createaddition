@@ -43,89 +43,25 @@ import net.minecraft.world.item.ItemStack;
 
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.text.html.Option;
-
 public class StatorBlock extends SimpleOrientedBlock implements IBE<StatorBlockEntity> {
 
     public static final EnumProperty<StatorBlockModelType> MODEL_TYPE = EnumProperty.create("model", StatorBlockModelType.class);  // BASE or CORNER
     public static final int placementHelperId = PlacementHelpers.register(new PlacementHelper());
     public static final VoxelShaper BASE_SHAPE = CAShapes.shape(0, 0, 0, 16, 11, 16).defaultUp();
     public static final VoxelShaper CORNER_SHAPE = CAShapes.shape(0, 0, 0, 16, 11, 7).add(0, 9, 5, 16, 16, 16).defaultUp();
-
     @Override
-    public void destroy(LevelAccessor pLevel, BlockPos pPos, BlockState pState){
-        super.destroy(pLevel, pPos, pState);
-        if (pLevel.isClientSide())
-            return;
-        Optional<RotorBlockEntity> rotorBlockEntityOptional = GetFacingRotorBlock(pLevel, pPos, pState);
-        if (rotorBlockEntityOptional.isEmpty())
-            return;
-        rotorBlockEntityOptional.get().RemoveStator(pPos);
+    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        IBE.onRemove(pState, pLevel, pPos, pNewState);
     }
+
     @Override
     public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
         super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
         if (pLevel.isClientSide())
             return;
-        Optional<RotorBlockEntity> rotorBlockEntityOptional = GetFacingRotorBlock(pLevel, pPos, pState);
-        if (rotorBlockEntityOptional.isEmpty())
-            return;
-        rotorBlockEntityOptional.get().AddStator(pPos);
+        ((StatorBlockEntity)pLevel.getBlockEntity(pPos)).onStatorPlaced();
     }
 
-    public static Optional<RotorBlockEntity> GetFacingRotorBlock(LevelAccessor pLevel, BlockPos statorPos, BlockState statorState)
-    {
-        BlockPos   normalPos   = getBlockNormalPosFromState(pLevel, statorPos, statorState);
-        BlockState normalState = pLevel.getBlockState(normalPos);
-        if (normalState.getBlock() != CABlocks.ROTOR.get())
-            return Optional.empty();
-        return Optional.of((RotorBlockEntity) pLevel.getBlockEntity(normalPos));
-    }
-
-    public static BlockPos[] OrientationToBlockPos = new BlockPos[]{
-            new BlockPos(0, -1, +1), // down_x
-            new BlockPos(+1, -1, 0), // down_z
-            new BlockPos(0, +1, -1), // up_x
-            new BlockPos(-1, +1, 0), // up_z
-            new BlockPos(0, 0, 0), // north_y
-            new BlockPos(0, -1, -1), // north_x
-            new BlockPos(0, 0, 0), // south_y
-            new BlockPos(0, +1, +1), // south_x
-            new BlockPos(0, 0, 0), // east_y
-            new BlockPos(+1, +1, 0), // east_z
-            new BlockPos(0, 0, 0), // west_y
-            new BlockPos(-1, -1, 0) //west_z
-    };
-
-    public static BlockPos[] OrientationToBlockPosFlat = new BlockPos[]{
-            new BlockPos(0, -1, 0), // down_x
-            new BlockPos(0, -1, 0), // down_z
-            new BlockPos(0, +1, 0), // up_x
-            new BlockPos(0, +1, 0), // up_z
-            new BlockPos(0, 0, -1), // north_y
-            new BlockPos(0, 0, -1), // north_x
-            new BlockPos(0, 0, +1), // south_y
-            new BlockPos(0, 0, +1), // south_x
-            new BlockPos(+1, 0, 0), // east_y
-            new BlockPos(+1, 0, 0), // east_z
-            new BlockPos(-1, 0, 0), // west_y
-            new BlockPos(-1, 0, 0) //west_z
-    };
-
-    public static BlockPos getBlockNormalPosFromState(LevelAccessor level, BlockPos blockPos, BlockState state)
-    {
-        SimpleOrientation orient = state.getValue(SimpleOrientedBlock.ORIENTATION);
-        if (state.getValue(StatorBlock.MODEL_TYPE) == StatorBlock.StatorBlockModelType.CORNER) {
-            BlockPos offset = OrientationToBlockPos[orient.getIndex()];
-            BlockPos normalPos = blockPos.offset(offset);
-            return normalPos;
-        }
-        else {
-            BlockPos offset = OrientationToBlockPosFlat[orient.getIndex()];
-            BlockPos normalPos = blockPos.offset(offset);
-            return normalPos;
-        }
-    }
 
     public enum StatorBlockModelType implements StringRepresentable {
         BASE, CORNER;

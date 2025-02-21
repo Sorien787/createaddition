@@ -3,6 +3,7 @@ package com.mrh0.createaddition.blocks.alternator;
 import java.util.List;
 
 import com.mrh0.createaddition.CreateAddition;
+import com.mrh0.createaddition.blocks.base_electro_kinetic.BaseElectroKineticBlockEntity;
 import com.mrh0.createaddition.config.Config;
 import com.mrh0.createaddition.energy.InternalEnergyStorage;
 import com.mrh0.createaddition.util.Util;
@@ -24,15 +25,10 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
 
-public class AlternatorBlockEntity extends KineticBlockEntity {
-
-	protected final InternalEnergyStorage energy;
-	private LazyOptional<IEnergyStorage> lazyEnergy;
+public class AlternatorBlockEntity extends BaseElectroKineticBlockEntity {
 
 	public AlternatorBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
 		super(typeIn, pos, state);
-		energy = new InternalEnergyStorage(Config.ALTERNATOR_CAPACITY.get(), 0, Config.ALTERNATOR_MAX_OUTPUT.get());
-		lazyEnergy = LazyOptional.of(() -> energy);
 	}
 
 	@Override
@@ -47,63 +43,38 @@ public class AlternatorBlockEntity extends KineticBlockEntity {
 		return added;
 	}
 
-	/*@Override
-	public float calculateStressApplied() {
-		float impact = Config.MAX_STRESS.get()/256f;
-		this.lastStressApplied = impact;
-		return impact;
-	}*/
-
-	@Override
-	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-		if(cap == ForgeCapabilities.ENERGY)// && (isEnergyInput(side) || isEnergyOutput(side))
-			return lazyEnergy.cast();
-		return super.getCapability(cap, side);
-	}
-
 	public boolean isEnergyInput(Direction side) {
 		return false;
 	}
 
 	public boolean isEnergyOutput(Direction side) {
-		return true; //side != getBlockState().getValue(AlternatorBlock.FACING);
+		return true;
 	}
 
 	@Override
-	public void read(CompoundTag compound, boolean clientPacket) {
-		super.read(compound, clientPacket);
-		energy.read(compound);
+	public int getCapacity() {
+		return Config.ALTERNATOR_CAPACITY.get();
 	}
 
 	@Override
-	public void write(CompoundTag compound, boolean clientPacket) {
-		super.write(compound, clientPacket);
-		energy.write(compound);
+	public int getMaxIn() {
+		return getCapacity();
 	}
 
-	private boolean firstTickState = true;
+	@Override
+	public int getMaxOut() {
+		return Config.ALTERNATOR_MAX_OUTPUT.get();
+	}
 
 	@Override
 	public void tick() {
 		super.tick();
+
 		if(level.isClientSide())
 			return;
-		if(firstTickState)
-			firstTick();
-		firstTickState = false;
 
 		if(Math.abs(getSpeed()) > 0 && isSpeedRequirementFulfilled())
 			energy.internalProduceEnergy(getEnergyProductionRate((int)getSpeed()));
-
-		for(Direction d : Direction.values()) {
-			if(!isEnergyOutput(d))
-				continue;
-			IEnergyStorage ies = getCachedEnergy(d);
-			if(ies == null)
-				continue;
-			int ext = energy.extractEnergy(ies.receiveEnergy(Config.ALTERNATOR_MAX_OUTPUT.get(), true), false);
-			ies.receiveEnergy(ext, false);
-		}
 	}
 
 	public static int getEnergyProductionRate(int rpm) {
@@ -114,77 +85,5 @@ public class AlternatorBlockEntity extends KineticBlockEntity {
 	@Override
 	protected Block getStressConfigKey() {
 		return AllBlocks.MECHANICAL_MIXER.get();
-	}
-
-	@Override
-	public void remove() {
-		lazyEnergy.invalidate();
-		super.remove();
-	}
-
-	public void firstTick() {
-		updateCache();
-	};
-
-	public void updateCache() {
-		if(level.isClientSide())
-			return;
-		for(Direction side : Direction.values()) {
-			BlockEntity te = level.getBlockEntity(worldPosition.relative(side));
-			if(te == null) {
-				setCache(side, LazyOptional.empty());
-				continue;
-			}
-			LazyOptional<IEnergyStorage> le = te.getCapability(ForgeCapabilities.ENERGY, side.getOpposite());
-			setCache(side, le);
-		}
-	}
-
-	private LazyOptional<IEnergyStorage> escacheUp = LazyOptional.empty();
-	private LazyOptional<IEnergyStorage> escacheDown = LazyOptional.empty();
-	private LazyOptional<IEnergyStorage> escacheNorth = LazyOptional.empty();
-	private LazyOptional<IEnergyStorage> escacheEast = LazyOptional.empty();
-	private LazyOptional<IEnergyStorage> escacheSouth = LazyOptional.empty();
-	private LazyOptional<IEnergyStorage> escacheWest = LazyOptional.empty();
-
-	public void setCache(Direction side, LazyOptional<IEnergyStorage> storage) {
-		switch(side) {
-			case DOWN:
-				escacheDown = storage;
-				break;
-			case EAST:
-				escacheEast = storage;
-				break;
-			case NORTH:
-				escacheNorth = storage;
-				break;
-			case SOUTH:
-				escacheSouth = storage;
-				break;
-			case UP:
-				escacheUp = storage;
-				break;
-			case WEST:
-				escacheWest = storage;
-				break;
-		}
-	}
-
-	public IEnergyStorage getCachedEnergy(Direction side) {
-		switch(side) {
-			case DOWN:
-				return escacheDown.orElse(null);
-			case EAST:
-				return escacheEast.orElse(null);
-			case NORTH:
-				return escacheNorth.orElse(null);
-			case SOUTH:
-				return escacheSouth.orElse(null);
-			case UP:
-				return escacheUp.orElse(null);
-			case WEST:
-				return escacheWest.orElse(null);
-		}
-		return null;
 	}
 }

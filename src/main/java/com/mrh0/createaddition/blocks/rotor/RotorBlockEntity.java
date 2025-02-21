@@ -15,9 +15,8 @@ import java.util.*;
 
 public class RotorBlockEntity extends KineticBlockEntity {
 
-    private int numStators = 0;
+    private boolean hasCoil = false;
 
-    private float cachedEfficiency = 0f;
 
     public RotorBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
@@ -27,99 +26,35 @@ public class RotorBlockEntity extends KineticBlockEntity {
     @Override
     protected void read(CompoundTag compound, boolean clientPacket) {
         super.read(compound, clientPacket);
-        numStators = compound.getInt("statorNumber");
-        cachedEfficiency = compound.getFloat("efficiency");
+        hasCoil = compound.getBoolean("hasCoil");
     }
 
     @Override
     protected void write(CompoundTag compound, boolean clientPacket) {
         super.write(compound, clientPacket);
-        compound.putInt("statorNumber", numStators);
-        compound.putFloat("efficiency", cachedEfficiency);
+        compound.putBoolean("hasCoil", hasCoil);
     }
 
-    public void AddStator(BlockPos pos)
-    {
-        BlockState rotorBlockState = level.getBlockState(getBlockPos());
-        Direction.Axis axis = rotorBlockState.getValue(RotorBlock.AXIS);
-        if(getBlockPos().get(axis) != pos.get(axis))
-            return;
-        numStators++;
-        if (numStators != 8)
-            return;
-        UpdateNeighbourEfficiency();
+
+    public void setHasCoil(boolean hasCoil){
+        this.hasCoil = hasCoil;
+        coilDataUpdated();
     }
 
-    public void RemoveStator(BlockPos pos)
-    {
-        BlockState rotorBlockState = level.getBlockState(getBlockPos());
-        Direction.Axis axis = rotorBlockState.getValue(RotorBlock.AXIS);
-        if(getBlockPos().get(axis) != pos.get(axis))
-            return;
-        numStators--;
-        if (numStators != 7)
-            return;
-        UpdateNeighbourEfficiency();
-    }
-
-    public void UpdateNeighbourEfficiency()
-    {
-        RotorBlock block = (RotorBlock) getBlockState().getBlock();
-        ArrayList<BlockPos> neighbours = block.getAdjacentShaftPosition(getBlockState().getValue(RotorBlock.AXIS), getBlockPos(), level);
-        TryUpdateEfficiency(getBlockPos());
-
-        Direction.Axis thisAxis = getBlockState().getValue(RotorBlock.AXIS);
-        for (BlockPos neighbourPos : neighbours){
-            if (!RotorBlock.IsBlockPosParallelRotor(getLevel(), neighbourPos, thisAxis))
-                continue;
-            TryUpdateEfficiency(neighbourPos);
-        }
-    }
-    private boolean hasFullCoil(){
-        return numStators == 8;
-    }
-    public float getProximalEfficiencyScalar(){
-        return hasFullCoil() ? 0.75f : 1.0f;
-    }
-    private float getStatorEfficiencyScalar(){
-        return hasFullCoil() ? 1.0f : 0.0f;
-    }
-    public void TryUpdateEfficiency(BlockPos blockPos){
-        if (level.getBlockState(blockPos).getBlock() != CABlocks.ROTOR.get())
-            return;
-        ((RotorBlockEntity)level.getBlockEntity(blockPos)).UpdateEfficiency();
-    }
-    public boolean getHasCoil(){
-        return numStators == 8;
-    }
-    public float getCachedEfficiency(){
-        return cachedEfficiency;
-    }
-    private void UpdateEfficiency()
-    {
-        RotorBlock rotorBlock = (RotorBlock) getBlockState().getBlock();
-        ArrayList<BlockPos> neighbours = rotorBlock.getAdjacentShaftPosition(getBlockState().getValue(RotorBlock.AXIS), getBlockPos(), level);
-
-        float proximalEfficiencyScalar = getStatorEfficiencyScalar();
-
-        for (int i = 0; i < neighbours.size(); i++) {
-            if (level.getBlockState(neighbours.get(i)).getBlock() != CABlocks.ROTOR.get())
-                continue;
-            proximalEfficiencyScalar *= ((RotorBlockEntity)level.getBlockEntity(neighbours.get(i))).getProximalEfficiencyScalar();
-        }
-
-        if (cachedEfficiency == proximalEfficiencyScalar)
-            return;
-
-        cachedEfficiency = proximalEfficiencyScalar;
-        Optional<CollectorBlockEntity> collectorBlockEntityOptional = RotorBlock.getAssociatedCollector(getLevel(), getBlockPos(), getBlockState());
-        if (collectorBlockEntityOptional.isEmpty())
-            return;
-        collectorBlockEntityOptional.get().scheduleRotorDataUpdate();
-    }
 
     @Override
 	protected AABB createRenderBoundingBox() {
 		return new AABB(worldPosition).inflate(1);
 	}
+
+    public boolean getHasCoil() {
+        return hasCoil;
+    }
+
+    public void coilDataUpdated() {
+        Optional<CollectorBlockEntity> collectorBlockEntityOptional = RotorBlock.getAssociatedCollector(getLevel(), getBlockPos(), getBlockState());
+        if (collectorBlockEntityOptional.isEmpty())
+            return;
+        collectorBlockEntityOptional.get().scheduleRotorDataUpdate();
+    }
 }

@@ -51,6 +51,9 @@ public class WireNodeRenderer<T extends BlockEntity> implements BlockEntityRende
 			if (wn == null)
 				return;
 
+			if (te.getNodeType(i) == WireType.NONE || te.getNodeType(i) == null)
+				return;
+
 				Vec3 d2 = wn.getNodeOffset(te.getOtherNodeIndex(i)); // get other
 				float ox2 = ((float) d2.x());
 				float oy2 = ((float) d2.y());

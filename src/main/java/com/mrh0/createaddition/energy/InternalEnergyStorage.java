@@ -31,7 +31,12 @@ public class InternalEnergyStorage extends EnergyStorage {
     	nbt.putInt("energy", energy);
     	return nbt;
     }
-    
+    public void setMaxIn(int maxIn){
+        maxReceive = maxIn;
+    }
+    public void setMaxOut(int maxOut){
+        maxExtract = maxOut;
+    }
     public void read(CompoundTag nbt) {
     	setEnergy(nbt.getInt("energy"));
     }

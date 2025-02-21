@@ -9,7 +9,10 @@ public enum WireType {
 	COPPER(0, 256, 78, 37, 30, CAItems.COPPER_WIRE.asStack(4), CAItems.COPPER_SPOOL.asStack()),
 	GOLD(1, 1024, 98, 83, 29, CAItems.GOLD_WIRE.asStack(4), CAItems.GOLD_SPOOL.asStack()),
 	ELECTRUM(2, 8196, 88, 66, 37, CAItems.ELECTRUM_WIRE.asStack(4), CAItems.ELECTRUM_SPOOL.asStack()),
-	FESTIVE(3, 256, 26, 94, 12, CAItems.COPPER_WIRE.asStack(4), CAItems.FESTIVE_SPOOL.asStack());
+	FESTIVE(3, 256, 26, 94, 12, CAItems.COPPER_WIRE.asStack(4), CAItems.FESTIVE_SPOOL.asStack()),
+
+	NONE(4, 0, 0, 0, 0, CAItems.COPPER_WIRE.asStack(0), CAItems.COPPER_SPOOL.asStack());
+
 	//IRON(4, 256, 87, 87, 87, CAItems.IRON_WIRE.asStack(4), CAItems.IRON_SPOOL.asStack());
 
 	private final int ID, TRANSFER, CR, CG, CB;
@@ -32,7 +35,7 @@ public enum WireType {
 			case 1 -> GOLD;
 			case 2 -> ELECTRUM;
 			case 3 -> FESTIVE;
-			//case 4 -> IRON;
+			case 4 -> NONE;
 			default -> null;
 		};
 	}

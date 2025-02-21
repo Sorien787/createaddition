@@ -22,7 +22,11 @@ public class EnergyNetwork {
 	private int pushed = 0;
 	
 	private static final int MAX_BUFF = 80000;
-	
+
+	public static int getMaxBuff(){
+		return MAX_BUFF;
+	}
+
 	public EnergyNetwork(Level world) {
 		this.inBuff = 0;
 		this.outBuff = 0;

@@ -5,11 +5,11 @@ import java.util.function.Predicate;
 
 import com.google.common.base.Predicates;
 
+import com.mrh0.createaddition.blocks.stator.StatorBlockEntity;
 import com.mrh0.createaddition.index.CABlockEntities;
 import com.mrh0.createaddition.index.CABlocks;
 import com.mrh0.createaddition.blocks.collector.CollectorBlock;
 import com.mrh0.createaddition.blocks.collector.CollectorBlockEntity;
-import com.mrh0.createaddition.blocks.stator.StatorBlock;
 
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
 import com.simibubi.create.content.kinetics.simpleRelays.ShaftBlock;
@@ -53,8 +53,8 @@ public class RotorBlock extends RotatedPillarKineticBlock implements IBE<RotorBl
         super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
         if (pLevel.isClientSide())
             return;
-        DoStatorCheck(pLevel, pPos, pState);
-        DoCollectorUpdate(pLevel, pPos, pState);
+        doStatorCheck(pLevel, pPos, pState);
+        doCollectorUpdate(pLevel, pPos, pState);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class RotorBlock extends RotatedPillarKineticBlock implements IBE<RotorBl
         super.destroy(pLevel, pPos, pState);
         if (pLevel.isClientSide())
             return;
-        DoCollectorUpdate(pLevel, pPos, pState);
+        doCollectorUpdate(pLevel, pPos, pState);
     }
 
     @Override
@@ -135,39 +135,25 @@ public class RotorBlock extends RotatedPillarKineticBlock implements IBE<RotorBl
         }
         return rotorEndBlockPos;
     }
-    private void DoCollectorUpdate(LevelAccessor pLevel, BlockPos pPos, BlockState pState){
+    private void doCollectorUpdate(LevelAccessor pLevel, BlockPos pPos, BlockState pState){
         Optional<CollectorBlockEntity> collectorBlockEntity = getAssociatedCollector(pLevel, pPos, pState);
         if (collectorBlockEntity.isEmpty())
             return;
         collectorBlockEntity.get().scheduleRotorDataUpdate();
     }
-    private void DoStatorCheck(Level pLevel, BlockPos pPos, BlockState pState){
+    private void doStatorCheck(Level pLevel, BlockPos pPos, BlockState pState){
         Collection<Axis> axesChoices = AXIS.getPossibleValues();
-        ArrayList<Axis> axes = new ArrayList<Axis>(axesChoices);
+        ArrayList<Axis> axes = new ArrayList<>(axesChoices);
         axes.remove(pState.getValue(AXIS));
-        RotorBlockEntity rotorBlockEntity = (RotorBlockEntity) pLevel.getBlockEntity(pPos);
-        for (int i = 0; i < 9; i++)
-        {
+        BlockPos otherPos = pPos.relative(axes.get(0), 1);
+        BlockState otherState = pLevel.getBlockState(otherPos);
+        if (otherState.getBlock() != CABlocks.STATOR.get())
+            return;
 
-            int axisADistance = i / 3 - 1;
-            int axisBDistance = i % 3 - 1;
-            if (axisADistance == 0 && axisBDistance == 0)
-                continue;
-            Axis axisA = axes.get(0);
-            Axis axisB = axes.get(1);
-            BlockPos otherPos = pPos.relative(axisA, axisADistance).relative(axisB, axisBDistance);
-            BlockState otherBlockState = pLevel.getBlockState(otherPos);
-            if (otherBlockState.getBlock() != CABlocks.STATOR.get())
-                continue;
-            Optional<RotorBlockEntity> optionalRotorBlock = StatorBlock.GetFacingRotorBlock(pLevel, otherPos, otherBlockState);
-            if (optionalRotorBlock.isEmpty())
-                continue;
-            if(optionalRotorBlock.get().getBlockPos() != pPos)
-                continue;
-            optionalRotorBlock.get().AddStator(otherPos);
-        }
-
-        rotorBlockEntity.UpdateNeighbourEfficiency();
+        if (!((StatorBlockEntity)pLevel.getBlockEntity(otherPos)).hasCoil())
+            return;
+        RotorBlockEntity rotorBlockEntity = (RotorBlockEntity)pLevel.getBlockEntity(pPos);
+        rotorBlockEntity.setHasCoil(true);
     }
     public RotorBlock(Properties properties) {
         super(properties);
@@ -197,15 +183,12 @@ public class RotorBlock extends RotatedPillarKineticBlock implements IBE<RotorBl
 
         OnParallelChanged(state, axis, pos, world);
     }
-
     private void OnParallelChanged(BlockState state, Axis axis, BlockPos pos, Level world)
     {
         ArrayList<BlockPos> adjacentBlockStates = getAdjacentShaftPosition(axis, pos, world); // front block = 0, rear block = 1
         RotorModelType modelType = getRotorModelTypeFromAdjacent(world, adjacentBlockStates, state);
         setModel(world, pos, state, modelType);
     }
-
-
     private void setModel(Level world, BlockPos pos, BlockState state, RotorModelType bType) {
         if(state.getValue(MODEL_TYPE) == bType)
             return;

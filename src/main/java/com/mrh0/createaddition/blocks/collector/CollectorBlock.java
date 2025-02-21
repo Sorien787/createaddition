@@ -2,6 +2,7 @@ package com.mrh0.createaddition.blocks.collector;
 
 import java.util.Locale;
 
+import com.mrh0.createaddition.blocks.alternator.AlternatorBlockEntity;
 import com.mrh0.createaddition.index.CABlocks;
 import com.mrh0.createaddition.index.CABlockEntities;
 import com.mrh0.createaddition.blocks.rotor.RotorBlock;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -102,12 +104,17 @@ public class CollectorBlock extends DirectionalKineticBlock implements IBE<Colle
             return;
         world.setBlock(pos, state.setValue(MODEL_TYPE, modelType), Block.UPDATE_ALL);
     }
-
     @Override
     public void neighborChanged(BlockState state, Level world, BlockPos pos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
         super.neighborChanged(state, world, pos, pBlock, pFromPos, pIsMoving);
         boolean rotorInFront = doRotorCheck(world, pos, state);
         setModelType(rotorInFront ? CollectorBlockModelType.ROTORED : CollectorBlockModelType.BASE, world, pos, state);
+        BlockEntity tileentity = state.hasBlockEntity() ? world.getBlockEntity(pos) : null;
+        if(tileentity != null) {
+            if(tileentity instanceof CollectorBlockEntity) {
+                ((CollectorBlockEntity)tileentity).updateCache();
+            }
+        }
     }
 
     private boolean doRotorCheck(Level world, BlockPos pos, BlockState state) {
@@ -130,6 +137,12 @@ public class CollectorBlock extends DirectionalKineticBlock implements IBE<Colle
             return false;
 
         return super.canSurvive(state, world, pos);
+    }
+
+    @Override
+    public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor) {
+        super.onNeighborChange(state, level, pos, neighbor);
+        ((CollectorBlockEntity)getBlockEntity(level, pos)).onNeighbourChanged(neighbor);
     }
 
     @Override
